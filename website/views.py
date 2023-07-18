@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from .forms import SignUpForm, AddRecordForm 
-from .models import Record
-
-
+from .forms import SignUpForm, AddRecordForm, GenerateRoomForm
+from .models import Record, Room, Message
+from django.http import HttpResponse, JsonResponse
+from django.utils import timezone
 
 def home(req):
     records = Record.objects.all()
@@ -73,7 +73,7 @@ def add_record(req):
     if req.user.is_authenticated:
         if req.method == "POST":
             if form.is_valid():
-                add_record = form.save()
+                form.save()
                 messages.success(req, "Record Added...")
                 return redirect('home')
         return render(req, 'add_record.html', {'form':form})
@@ -94,8 +94,54 @@ def update_record(req, pk):
         messages.success(req, "You Do Not Have Access To This Page...")
         return redirect('home')
 
+def generate_room(req):
+    if req.user.is_authenticated:
+        if req.method == 'POST':
+            form = GenerateRoomForm(req.POST)
+            if form.is_valid():
+                form.save()
+                room = form.cleaned_data['room']
+                user = form.cleaned_data['user']
+                messages.success(req, "You Have Successfully Generated A New Chat Room!!")
+                return redirect('room')
+        else:
+            form = GenerateRoomForm()
+        return render(req, 'generate_room.html', {'form':form})
+    else:
+        messages.success(req, "You Do Not Have Access To This Page...")
+        return redirect('home')
+
+ 
+def room(req, room):
+    username = req.GET.get('user')
+    try:
+        room_details = Room.objects.get(name=room)
+    except Room.DoesNotExist:
+        new_room = Room.objects.create(name=room)
+        new_room.save()
+        room_details = new_room
+
+    return render(req, 'room.html', {
+        'user': username,
+        'room': room,
+        'room_details': room_details
+    })
+# def checkview(req):
+#     room = req.POST['room']
+#     user = req.POST['user']
+
     
+def send(req):
+    message = req.POST['message']
+    username = req.POST['username']
+    room_id = req.POST['room_id']
+    new_message = Message.objects.create(value=message, user=username, room=room_id, created_at=timezone.now())
+    new_message.save()
+    return HttpResponse("Message sent successfully!")
 
-
+def getMessages(request, room):
+    room_details = Room.objects.get(name=room)
+    messages = Message.objects.filter(room=room_details.id)
+    return JsonResponse({"messages":list(messages.values())})
 
 

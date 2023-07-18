@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime
 
 class Record(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -13,4 +14,14 @@ class Record(models.Model):
 
     def __str__(self):
         return(f"{self.first_name} {self.last_name}")
+
+class Room(models.Model):
+    name = models.CharField(max_length=50)
+    user = models.CharField(max_length=100, default="")
+    
+class Message(models.Model):
+    value = models.CharField(max_length=1000)
+    created_at = models.DateTimeField(default = datetime.now, blank = True)
+    user = models.CharField(max_length=100)
+    room = models.CharField(max_length=100)
     
