@@ -2,9 +2,14 @@ from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from .forms import SignUpForm, AddRecordForm, GenerateRoomForm
-from .models import Record, Room, Message
-from django.http import HttpResponse, JsonResponse
+from .models import Record, Room, Message, Response, MessageIndex
+from django.http import JsonResponse
 from django.utils import timezone
+from nltk.sentiment import SentimentIntensityAnalyzer
+import openai
+
+openai_api_key = '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'
+openai.api_key = openai_api_key
 
 def home(req):
     records = Record.objects.all()
@@ -100,8 +105,6 @@ def generate_room(req):
             form = GenerateRoomForm(req.POST)
             if form.is_valid():
                 form.save()
-                room = form.cleaned_data['room']
-                user = form.cleaned_data['user']
                 messages.success(req, "You Have Successfully Generated A New Chat Room!!")
                 return redirect('room')
         else:
@@ -115,7 +118,11 @@ def generate_room(req):
 def room(req, room):
     username = req.GET.get('user')
     try:
+        index = MessageIndex()
+        index.save()
         room_details = Room.objects.get(name=room)
+        Message.objects.all().delete()
+        Response.objects.all().delete()
     except Room.DoesNotExist:
         new_room = Room.objects.create(name=room)
         new_room.save()
@@ -126,22 +133,43 @@ def room(req, room):
         'room': room,
         'room_details': room_details
     })
-# def checkview(req):
-#     room = req.POST['room']
-#     user = req.POST['user']
-
     
 def send(req):
-    message = req.POST['message']
-    username = req.POST['username']
-    room_id = req.POST['room_id']
-    new_message = Message.objects.create(value=message, user=username, room=room_id, created_at=timezone.now())
-    new_message.save()
-    return HttpResponse("Message sent successfully!")
+    if req.method == 'POST':
+        message = req.POST.get('message')
+        response = ask_openai(message)
+        return JsonResponse({"response": response, "message": message})
+    return render(req, 'room.html')
 
-def getMessages(request, room):
-    room_details = Room.objects.get(name=room)
-    messages = Message.objects.filter(room=room_details.id)
-    return JsonResponse({"messages":list(messages.values())})
+
+def ask_openai(message):
+    response = openai.Completion.create(
+        model = "text-davinci-003",
+        prompt = message,
+        max_tokens = 150,
+        n = 1,
+        stop = None,
+        temperature = 0.7
+    )
+    return response.choices[0].text
+    #['delta']['content'].strip()
+
+
+def generate_ticket(req):
+    if MessageIndex.objects.first() >= 2:
+        msg = Message.objects.last().value
+        ticket_importance = SentimentIntensityAnalyzer.polarity_scores(msg)['compound'] * 10
+        MessageIndex.objects.all().delete()
+        ticket_data = {
+            "issue": msg,
+            "created_at": timezone.now(),
+            "importance": ticket_importance
+        }
+        return JsonResponse({'ticket_data': ticket_data})
+    return render()
+    #delete Message Index object
+
+def display_tickets(req):
+    return render(req, 'display_tickets.html')
 
 

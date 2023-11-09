@@ -1,0 +1,68 @@
+{
+    "intents": [
+        {
+            "tag": "greeting",
+            "patterns": [
+                "Hi",
+                "Hello",
+                "Hey",
+                "How are you?",
+                "Is anyone there?",
+                "Hello",
+                "Good day",
+                "How is your day"
+            ],
+            "responses": [
+                "Hello :) Thanks for visiting, what can I do for you?",
+                "Hi there, how can I assist you??",
+                "Hi there, how can I help?",
+                "Good day, how can I be of service?",
+                "Hey there :), how can I help?"
+            ]
+        },
+        {
+            "tag": "service",
+            "patterns": [
+                "I seem to be having a problem with the site",
+                "I'm having trouble accessing a page", 
+                "I cannot access my records", 
+                "I cannot add/delete a record", 
+                "Wrong information is being displayed in a record", 
+                "There is a glitch in the system"
+            ],
+            "responses": [
+                "That is unfortunate, can you provide me with more details so I can diagnose the problem?",
+                "I'm sorry to hear you are having issues. Can you provide some information so I can have the support team investigate the issue further?",
+                "Can you provide a brief description of the issue you are experiencing so I can have our team investigate it?",
+                "Would you like me to transfer your issue to a support team representative?"
+            ]
+        },
+        {
+            "tag": "identification",
+            "patterns": [
+                "I cannot access my records", 
+                "I cannot add/delete a record",
+                "The page is not displaying my records correctly",
+                "I cannot access another page"
+            ],
+            "responses": [
+                "Okay, I will create a ticket and report the issue to our team."
+            ]
+        },
+        {
+            "tag": "closing",
+            "patterns": [
+                "Bye",
+                "See you later", 
+                "Goodbye", 
+                "Thank you for you assistance",
+                "Appreciate it, thank you for the help"
+            ],
+            "responses": [
+                "See you later, thanks for visiting!",
+                "Glad I could help you, have a nice day!",
+                "Bye! Come back again soon"
+            ]
+        }
+    ]
+}

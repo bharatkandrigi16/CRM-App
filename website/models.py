@@ -22,6 +22,21 @@ class Room(models.Model):
 class Message(models.Model):
     value = models.CharField(max_length=1000)
     created_at = models.DateTimeField(default = datetime.now, blank = True)
+    messageIndex = models.IntegerField(default=1)
     user = models.CharField(max_length=100)
     room = models.CharField(max_length=100)
+
+class Response(models.Model):
+    value = models.CharField(max_length=1000)
+    created_at = models.DateTimeField(default = datetime.now, blank = True)
+    room = models.CharField(max_length=100)
+
+class MessageIndex(models.Model):
+    index = models.IntegerField(default=1)
+
+class Ticket(models.Model):
+    issue = models.CharField(max_length=1000)
+    created_at = models.DateTimeField(default = datetime.now, blank = True)
+    importance = models.IntegerField(default=5)
+
     
